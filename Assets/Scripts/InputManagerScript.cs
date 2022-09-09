@@ -34,7 +34,11 @@ public class InputManagerScript : MonoBehaviour {
 					Vector2 pos2 = gameManager.GetPositionOfTokenInGrid(collider.gameObject);
 
 					// swap the two tokens' positions if they are close to each other
-					if(Mathf.Abs((pos1.x - pos2.x) + (pos1.y - pos2.y)) == 1){
+
+					// DEBUG
+					float distance_x = Mathf.Abs(pos1.x - pos2.x);
+					float distance_y = Mathf.Abs(pos1.y - pos2.y);
+                    if ((distance_x == 1 || distance_y == 1) && distance_x * distance_y == 0){
 						moveManager.SetupTokenExchange(selected, pos1, collider.gameObject, pos2, true);
 					}
 					// reset
