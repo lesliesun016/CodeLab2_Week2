@@ -155,7 +155,7 @@ public class MatchManagerScript : MonoBehaviour {
 
 					// find how many tokens match on the horizontal line
 					int horizonMatchLength = GetHorizontalMatchLength(x, y);
-					int verticalMatchLength = GetVerticalMatchLength(x, y);
+					
 
 					// remove all the matched tokens if the number of matched token is larger than 2
 					if(horizonMatchLength > 2){
@@ -169,17 +169,22 @@ public class MatchManagerScript : MonoBehaviour {
 						}
 					}
 
-                    if (verticalMatchLength > 2)
-                    {
-						for(int i = y; i < y + verticalMatchLength; i++)
-                        {
+                    
+				}
+                if (y < gameManager.gridHeight - 2)
+                {
+					int verticalMatchLength = GetVerticalMatchLength(x, y);
+					if (verticalMatchLength > 2)
+					{
+						for (int i = y; i < y + verticalMatchLength; i++)
+						{
 							GameObject token = gameManager.gridArray[x, i];
 							Destroy(token);
 
 							gameManager.gridArray[x, i] = null;
 							numRemoved++;
 						}
-                    }
+					}
 				}
 			}
 		}
