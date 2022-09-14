@@ -50,7 +50,7 @@ public class MatchManagerScript : MonoBehaviour {
 
 	public bool GridHasVerticalMatch(int x, int y)
     {
-		// get 3 tokens in a row
+		// get 3 tokens in a column
 		GameObject token1 = gameManager.gridArray[x, y + 0];
 		GameObject token2 = gameManager.gridArray[x, y + 1];
 		GameObject token3 = gameManager.gridArray[x, y + 2];
@@ -103,9 +103,9 @@ public class MatchManagerScript : MonoBehaviour {
 		return matchLength;
 	}
 
-	public int GetVerticalMatchLength(int x, int y)
+	public int GetVerticalMatchLengthDown(int x, int y)
 	{
-		int matchLength = 1;
+		int matchDownLength = 1;
 
 		// get the first token
 		GameObject first = gameManager.gridArray[x, y];
@@ -127,7 +127,7 @@ public class MatchManagerScript : MonoBehaviour {
 
 					if (sr1.sprite == sr2.sprite)
 					{
-						matchLength++;
+                        matchDownLength++;
 					}
 					else
 					{
@@ -140,52 +140,120 @@ public class MatchManagerScript : MonoBehaviour {
 				}
 			}
 		}
-		return matchLength;
+		return matchDownLength;
 
 	}
 
-	// remove all the matched tokens and return the number of removed tokens
-	public virtual int RemoveMatches(){
+    public int GetVerticalMatchLengthUp(int x, int y)
+    {
+        int matchUpLength = 1;
+
+        // get the first token
+        GameObject first = gameManager.gridArray[x, y];
+
+        if (first != null)
+        {
+
+            // get the sprite of the first token
+            SpriteRenderer sr1 = first.GetComponent<SpriteRenderer>();
+
+            // find how many tokens have the same sprite as the first token's on the same horizontal line
+            for (int i = y - 1; i >0 ; i--)
+            {
+                GameObject other = gameManager.gridArray[x, i];
+
+                if (other != null)
+                {
+                    SpriteRenderer sr2 = other.GetComponent<SpriteRenderer>();
+
+                    if (sr1.sprite == sr2.sprite)
+                    {
+                        matchUpLength++;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
+        return matchUpLength;
+
+    }
+
+    // remove all the matched tokens and return the number of removed tokens
+    public virtual int RemoveMatches(){
 		int numRemoved = 0;
 
 		// go through the entire grid
 		for(int x = 0; x < gameManager.gridWidth; x++){
 			for(int y = 0; y < gameManager.gridHeight ; y++){
+
 				if(x < gameManager.gridWidth - 2){
 
 					// find how many tokens match on the horizontal line
 					int horizonMatchLength = GetHorizontalMatchLength(x, y);
-					
 
 					// remove all the matched tokens if the number of matched token is larger than 2
 					if(horizonMatchLength > 2){
 
 						for(int i = x; i < x + horizonMatchLength; i++){
-							GameObject token = gameManager.gridArray[i, y]; 
-							Destroy(token);
+							GameObject token = gameManager.gridArray[i, y];
+
+							int verticalMatchLengthDown = GetVerticalMatchLengthDown(i, y);
+                            int verticalMatchLengthUp = GetVerticalMatchLengthUp(i, y);
+
+							//Add cross match logic
+                            if (verticalMatchLengthDown+ verticalMatchLengthUp > 2)
+                            {
+                                for (int j = y+1; j < y + verticalMatchLengthDown; j++)
+                                {
+                                    GameObject verticalToken = gameManager.gridArray[i, j];
+                                    Destroy(verticalToken);
+
+                                    gameManager.gridArray[i, j] = null;
+                                    numRemoved++;
+                                }
+
+                                for (int j = y - 1; j > y - verticalMatchLengthUp; j--)
+                                {
+                                    GameObject verticalToken = gameManager.gridArray[i, j];
+                                    Destroy(verticalToken);
+
+                                    gameManager.gridArray[i, j] = null;
+                                    numRemoved++;
+                                }
+                            }
+
+                            Destroy(token);
 
 							gameManager.gridArray[i, y] = null;
 							numRemoved++;
 						}
-					}
-
-                    
+					}                   
 				}
+
+
                 if (y < gameManager.gridHeight - 2)
                 {
-					int verticalMatchLength = GetVerticalMatchLength(x, y);
+					int verticalMatchLength = GetVerticalMatchLengthDown(x, y);
 					if (verticalMatchLength > 2)
 					{
-						for (int i = y; i < y + verticalMatchLength; i++)
+						for (int j = y; j < y + verticalMatchLength; j++)
 						{
-							GameObject token = gameManager.gridArray[x, i];
-							Destroy(token);
+							GameObject token = gameManager.gridArray[x, j];
+                            Destroy(token);
 
-							gameManager.gridArray[x, i] = null;
+							gameManager.gridArray[x, j] = null;
 							numRemoved++;
 						}
 					}
 				}
+
 			}
 		}
 		
